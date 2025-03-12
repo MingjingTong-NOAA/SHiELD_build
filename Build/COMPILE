@@ -48,7 +48,7 @@ spin()
 # set default values
 #
 # configure your build parameters
-  config="shield"
+  config="shieldda"
   hydro="nh"
   comp="prod"
   bit="32bit"
@@ -57,14 +57,14 @@ spin()
   clean="noclean"
   pic="nopic"
 
-  config_name="SHiELD"
+  config_name="SHiELDDA"
 
 #
 # parse arguments
   for arg in "$@"
   do
       case $arg in
-          shield|solo|shieldfull|shiemom)
+          shield|solo|shieldfull|shiemom|shieldda)
              config="${arg#*=}"
              if [ $config = 'solo' ] ; then
                config_name="SOLO"
@@ -75,6 +75,9 @@ spin()
              if [ $config = 'shiemom' ] ; then
                config_name="SHiEMOM"
              fi
+             if [ $config = 'shieldda' ] ; then
+                 config_name="SHiELDDA"
+             fi                               
              shift # Remove "config" from processing
              ;;
           nh|hydro|sw)
@@ -151,6 +154,10 @@ export BUILD_ROOT=${PWD%/*}
 export SHiELD_SRC=${PWD%/*/*}/SHiELD_SRC/
 export PATH="${BUILD_ROOT}/mkmf/bin:${BUILD_ROOT}/Build/mk_scripts:${PATH}"
 export NCEP_DIR=${BUILD_ROOT}/Build
+export HPCSTACK=Y
+if [ $config = 'shieldda' ] ; then
+  export DACONFIG=Y
+fi
 
 #
 # load the proper environment for your machine
@@ -236,7 +243,11 @@ fi
      echo " pre-built ${NCEP_DIR}/nceplibs/${compiler} exists"
   else
      echo " ${NCEP_DIR}/nceplibs/${compiler} does not exist"
-     ./BUILDnceplibs ${compiler} ${pic}
+     if [ $HPCSTACK = "N" ]; then
+        ./BUILDnceplibs ${compiler} ${pic}
+     else
+        echo " Use HPC STACK"
+     fi
      if [ $? -ne 0 ] ; then
         echo ">>> ${NCEP_DIR}/ncepdir/${compiler} build failed"
         exit 3
@@ -289,7 +300,12 @@ echo -e "  building ${config} ${hydro} ${comp} ${bit} ${compiler} \t `date`"
     mk_make ${config} ${hydro} ${comp} ${bit} ${avx} ${compiler} ${pic} >> build_${config}_${hydro}.${comp}.${bit}.${compiler}.out 2>&1
   #
   # move the executable to an accessible area
-    mv exec/${config}_${hydro}.${comp}.${bit}.${compiler}/test.x bin/${config_name}_${hydro}.${comp}.${bit}.${compiler}.x
+    if [[ -z "${EXEC_NAME}" ]]; then
+      exec_name=${config_name}_${hydro}.${comp}.${bit}.${compiler}.x
+    else
+      exec_name=${EXEC_NAME}
+    fi
+    mv exec/${config}_${hydro}.${comp}.${bit}.${compiler}/test.x bin/${exec_name}
 
 #
 # test and report on build success

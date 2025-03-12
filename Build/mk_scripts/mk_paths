@@ -23,7 +23,7 @@
 #  DISCLAIMER: This script is provided as-is and as such is unsupported.
 #
 
-CONFIG="shield"
+CONFIG="shieldda"
 HYDRO="nh"
 COMP="prod"
 BIT="32bit"
@@ -34,7 +34,7 @@ COMPILER="intel"
 for arg in "$@"
 do
     case $arg in
-        shield|solo|shieldfull|shiemom)
+        shield|solo|shieldfull|shiemom|shieldda)
         CONFIG="${arg#*=}"
         shift # Remove CONFIG from processing
         ;;
@@ -83,6 +83,45 @@ elif [ ${CONFIG} = 'shield' ] ; then
       GFDL_atmos_cubed_sphere/driver/SHiELD/atmosphere.F90 \
       GFDL_atmos_cubed_sphere/tools/ \
       GFDL_atmos_cubed_sphere/model/
+
+  list_paths -o ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_driver \
+      FMSCoupler/SHiELD/coupler_main.F90
+
+elif [ ${CONFIG} = 'shieldda' ]; then
+  list_paths -o ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_gfs \
+      SHiELD_physics/gsmphys/  \
+      SHiELD_physics/GFS_layer/ \
+      SHiELD_physics/IPD_layer/
+
+  list_paths -o ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_fv3core \
+      GFDL_atmos_cubed_sphere/driver/SHiELD/atmosphere.F90 \
+      GFDL_atmos_cubed_sphere/tools/ \
+      GFDL_atmos_cubed_sphere/model/
+
+  list_paths -o ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_stochastic_physics \
+      stochastic_physics/cellular_automata_global.F90 \
+      stochastic_physics/cellular_automata_sgs.F90 \
+      stochastic_physics/compns_stochy.F90 \
+      stochastic_physics/get_stochy_pattern.F90 \
+      stochastic_physics/halo_exchange.fv3.F90 \
+      stochastic_physics/kinddef.F90 \
+      stochastic_physics/lndp_apply_perts.F90 \
+      stochastic_physics/mersenne_twister.F90 \
+      stochastic_physics/mpi_wrapper.F90 \
+      stochastic_physics/plumes.F90 \
+      stochastic_physics/random_numbers.F90 \
+      stochastic_physics/spectral_transforms.F90 \
+      stochastic_physics/stochastic_physics.F90 \
+      stochastic_physics/stochy_data_mod.F90 \
+      stochastic_physics/stochy_internal_state_mod.F90 \
+      stochastic_physics/stochy_namelist_def.F90 \
+      stochastic_physics/stochy_patterngenerator.F90 \
+      stochastic_physics/update_ca.F90
+
+  list_paths -o ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_fv3 \
+      SHiELD_physics/FV3GFS/ \
+      SHiELD_physics/stochastic_physics/ \
+      atmos_drivers/SHiELD/atmos_model.F90
 
   list_paths -o ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_driver \
       FMSCoupler/SHiELD/coupler_main.F90

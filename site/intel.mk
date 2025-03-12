@@ -17,6 +17,10 @@ VERBOSE =
 OPENMP =
 PIC =
 
+include       $(ESMFMKFILE)
+ESMF_INC=$(ESMF_F90COMPILEPATHS)
+ESMF_LIB=$(ESMF_F90ESMFLINKPATHS) $(ESMF_F90ESMFLINKRPATHS) $(ESMF_F90ESMFLINKLIBS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_F90LINKOPTS)
+
 ##############################################
 # Need to use at least GNU Make version 3.81 #
 ##############################################
@@ -132,6 +136,16 @@ ifeq ($(NETCDF),3)
     CPPDEFS += -Duse_LARGEFILE
   endif
 endif
+
+ifeq ($(HPCSTACK),Y)
+  LDFLAGS += $(BACIO_LIB4) $(SP_LIBd) $(W3EMC_LIBd) $(W3NCO_LIBd)
+endif
+
+ifeq ($(DACONFIG), Y)
+  LDFLAGS += $(ESMF_LIB)
+endif
+
+$(info   LDFLAGS is $(LDFLAGS))
 
 LIBS += $(shell pkg-config --libs yaml-0.1)
 LDFLAGS += $(LIBS)

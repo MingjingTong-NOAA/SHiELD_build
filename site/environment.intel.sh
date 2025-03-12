@@ -31,20 +31,49 @@ case $hostname in
       echo " gaea C6 environment "
 
       . ${MODULESHOME}/init/sh
-      module unload PrgEnv-pgi PrgEnv-intel PrgEnv-gnu
-      module unload darshan-runtime
-      module load   PrgEnv-intel
-      module rm intel-classic
-      module rm intel-oneapi
-      module rm intel
-      module rm gcc
-      module load intel-classic/2023.2.0
-      module unload cray-libsci
-      module load cray-hdf5
-      module load cray-netcdf
-      module load craype-hugepages4M
-      #module load cmake/3.23.1
-      #module load libyaml/0.2.5
+      if [[ $HPCSTACK == "N" ]]; then
+        module unload PrgEnv-pgi PrgEnv-intel PrgEnv-gnu
+        module unload darshan-runtime
+        module load   PrgEnv-intel
+        module rm intel-classic
+        module rm intel-oneapi
+        module rm intel
+        module rm gcc
+        module load intel-classic/2023.2.0
+        module unload cray-libsci
+        module load cray-hdf5
+        module load cray-netcdf
+        module load craype-hugepages4M
+        #module load cmake/3.23.1
+        #module load libyaml/0.2.5
+
+        module use /ncrc/proj/epic/spack-stack/c6/spack-stack-1.6.0/envs/fms-2024.01/install/modulefiles/Core
+        module load stack-intel/2023.2.0
+        module load stack-cray-mpich/8.1.29
+
+        module load esmf/8.6.0
+        module load mapl/2.40.3-esmf-8.6.0
+      else
+        echo " HPCSTACK = Y "
+        module load   PrgEnv-intel
+        module load intel-classic/2023.2.0
+        module load cray-hdf5
+        module load cray-netcdf
+        module load craype-hugepages4M
+
+        module use /ncrc/proj/epic/spack-stack/c6/spack-stack-1.6.0/envs/fms-2024.01/install/modulefiles/Core
+        module load stack-intel/2023.2.0
+        module load stack-cray-mpich/8.1.29
+
+        module load esmf/8.6.0
+        module load mapl/2.40.3-esmf-8.6.0
+
+        module load bacio/2.4.1
+        module load sp/2.5.0
+        module load w3emc/2.10.0
+
+        module unload cray-libsci
+      fi
 
       # Add -DHAVE_GETTID to the FMS cppDefs
       export FMS_CPPDEFS=-DHAVE_GETTID
@@ -66,20 +95,39 @@ case $hostname in
       echo " gaea C5 environment "
 
       . ${MODULESHOME}/init/sh
-      module unload PrgEnv-pgi PrgEnv-intel PrgEnv-gnu
-      module unload darshan-runtime
-      module load   PrgEnv-intel
-      module rm intel-classic
-      module rm intel-oneapi
-      module rm intel
-      module rm gcc
-      module load intel-classic/2023.2.0
-      module unload cray-libsci
-      module load cray-hdf5/1.12.2.11
-      module load cray-netcdf/4.9.0.11
-      module load craype-hugepages4M
-      module load cmake/3.23.1
-      module load libyaml/0.2.5
+      if [[ $HPCSTACK == "N" ]]; then
+        module unload PrgEnv-pgi PrgEnv-intel PrgEnv-gnu
+        module unload darshan-runtime
+        module load   PrgEnv-intel
+        module rm intel-classic
+        module rm intel-oneapi
+        module rm intel
+        module rm gcc
+        module load intel-classic/2023.2.0
+        module unload cray-libsci
+        module load cray-hdf5/1.12.2.11
+        module load cray-netcdf/4.9.0.11
+        module load craype-hugepages4M
+        module load cmake/3.23.1
+        module load libyaml/0.2.5
+      else
+        module reset
+        module use /ncrc/proj/epic/spack-stack/spack-stack-1.6.0/envs/unified-env/install/modulefiles/Core
+        module load stack-intel/2023.2.0
+        module load stack-cray-mpich/8.1.28
+
+        module load hdf5/1.14.0
+        module load netcdf-c/4.9.2
+        module load netcdf-fortran/4.6.1
+        module load parallelio/2.5.10
+        module load esmf/8.6.0
+        module load mapl/2.40.3-esmf-8.6.0
+
+        module load bacio/2.4.1
+        module load sp/2.5.0
+        module load w3emc/2.10.0
+        module load w3nco/2.4.1
+      fi
 
       # Add -DHAVE_GETTID to the FMS cppDefs
       export FMS_CPPDEFS=-DHAVE_GETTID
@@ -158,12 +206,27 @@ case $hostname in
    h* )
       echo " hera environment "
 
-      source $MODULESHOME/init/sh
-      module load intel/15.1.133
-      module load netcdf/4.3.0
-      module load hdf5/1.8.14
-      module load cmake/3.20.1
+      if ( ! eval module help > /dev/null 2>&1 ) ; then
+          source /apps/lmod/lmod/init/bash
+      fi
+      module purge
 
+      module use /scratch1/NCEPDEV/nems/role.epic/spack-stack/spack-stack-1.6.0/envs/gsi-addon-dev-rocky8/install/modulefiles/Core
+      module load stack-intel/2021.5.0
+      module load stack-intel-oneapi-mpi/2021.5.1
+  
+      module load hdf5/1.14.0
+      module load netcdf-c/4.9.2
+      module load netcdf-fortran/4.6.1
+      module load esmf/8.5.0
+  
+      module load bacio/2.4.1
+      module load sp/2.5.0
+      module load w3emc/2.10.0
+      module load w3nco/2.4.1
+
+      export CPATH="$NETCDF/include:$CPATH"
+      export HDF5=${HDF5_ROOT}
       export LIBRARY_PATH="${LIBRARY_PATH}:${NETCDF}/lib:${HDF5}/lib"
       export NETCDF_DIR=${NETCDF}
       export FMS_CPPDEFS=""
