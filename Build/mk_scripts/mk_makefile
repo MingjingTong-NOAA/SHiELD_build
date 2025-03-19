@@ -36,7 +36,7 @@ COMPILER="intel"
 for arg in "$@"
 do
     case $arg in
-        shield|solo|shieldfull|shiemom|shieldda)
+        shield|solo|shieldfull|shiemom|shieldda|shieldfullda)
         CONFIG="${arg#*=}"
         shift # Remove CONFIG from processing
         ;;
@@ -70,7 +70,7 @@ GFS_cppDefs="-DNEW_TAUCTMAX -DNEMS_GSM -DINTERNAL_FILE_NML"
 FV3_cppDefs="-Duse_libMPI -Duse_netCDF -DHAVE_SCHED_GETAFFINITY -DSPMD -Duse_LARGEFILE -DINTERNAL_FILE_NML"
 if [ ${CONFIG} = 'shield' ] || [ ${CONFIG} = 'shieldda' ] ; then
   FV3_cppDefs+=" -DGFS_PHYS -DUSE_GFSL63"
-elif [ ${CONFIG} = 'shieldfull' ] || [ ${CONFIG} = 'shiemom' ]  ; then
+elif [ ${CONFIG} = 'shieldfull' ] || [ ${CONFIG} = 'shiemom' ] || [ ${CONFIG} = 'shieldfullda' ]  ; then
   FV3_cppDefs+=" -DGFS_PHYS -DUSE_GFSL63 -D_USE_LEGACY_LAND_"
 elif [ ${CONFIG} = 'solo' ] ; then
   FV3_cppDefs+=" -DDCMIP -DDYCORE_SOLO -DHIWPP"
@@ -86,7 +86,7 @@ fi
 
 #
 # add stochastic physics for SHiELD DA
-if [ ${CONFIG} = 'shieldda' ] ; then
+if [ ${CONFIG} = 'shieldda' ] || [ ${CONFIG} = 'shieldfullda' ] ; then
   FV3_cppDefs+=" -DSTOCHY"
 fi
 
@@ -95,11 +95,11 @@ pushd exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/
 ############################
 #---CREATE MAKEFILES
 ############################
-if [ ${CONFIG} = 'shield' ] || [ ${CONFIG} = 'shieldda' ] || [ ${CONFIG} = 'shieldfull' ]  ; then
+if [ ${CONFIG} = 'shield' ] || [ ${CONFIG} = 'shieldda' ] || [ ${CONFIG} = 'shieldfull' ] || [ ${CONFIG} = 'shieldfullda' ] ; then
   mkmf -m Makefile_gfs -a ${SHiELD_SRC} -t "${BUILD_ROOT}/${TEMPLATE}" -o "-cpp" -c "${GFS_cppDefs}" \
            -p libgfs.a ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_gfs
 
-  if [ ${CONFIG} = 'shieldda' ]  ; then
+  if [ ${CONFIG} = 'shieldda' ] || [ ${CONFIG} = 'shieldfullda' ] ; then
     mkmf -m Makefile_fv3core -a ${SHiELD_SRC} -t "${BUILD_ROOT}/${TEMPLATE}" -c "${FV3_cppDefs}" \
            -o "-I${SHiELD_SRC}/FMS/include -I${BUILD_ROOT}/Build/libFMS/${COMPILER}/${BIT}" \
            -p libfv3core.a ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_fv3core
@@ -115,7 +115,7 @@ if [ ${CONFIG} = 'shield' ] || [ ${CONFIG} = 'shieldda' ] || [ ${CONFIG} = 'shie
     mkmf -m Makefile_driver -a ${SHiELD_SRC} -t "${BUILD_ROOT}/${TEMPLATE}" -c "${FV3_cppDefs}" \
              -p test.x -o "-I${SHiELD_SRC}/FMS/include -I${NCEP_DIR}/libFMS/${COMPILER}/${BIT}" \
              ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_driver
-  elif [ ${CONFIG} = 'shieldfull' ] ; then
+  elif [ ${CONFIG} = 'shieldfull' ] || [ ${CONFIG} = 'shieldfullda' ] ; then
    mkmf -m Makefile_fv3 -a ${SHiELD_SRC} -t "${BUILD_ROOT}/${TEMPLATE}" \
              -o "-I${SHiELD_SRC}/FMS/include -I${SHiELD_SRC}/GFDL_atmos_cubed_sphere/driver/SHiELDFULL/include -I${NCEP_DIR}/libFMS/${COMPILER}/64bit" -c "${FV3_cppDefs}" \
              -p libfv3.a ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_fv3
@@ -149,7 +149,7 @@ fi
 sed 's/LDFLAGS/NCEPLIBS) $(LDFLAGS/g' < Makefile_fv3 > OUT
 mv OUT Makefile_fv3
 
-if [ ${CONFIG} = 'shield' ] ||  [ ${CONFIG} = 'shieldfull' ] || [ ${CONFIG} = 'shiemom' ] ||  [ ${CONFIG} = 'shieldda' ] ; then
+if [ ${CONFIG} = 'shield' ] ||  [ ${CONFIG} = 'shieldfull' ] || [ ${CONFIG} = 'shiemom' ] || [ ${CONFIG} = 'shieldda' ] || [ ${CONFIG} = 'shieldfullda' ] ; then
   sed 's/LDFLAGS/NCEPLIBS) $(LDFLAGS/g' < Makefile_driver > OUT
   mv OUT Makefile_driver
 fi
@@ -157,7 +157,7 @@ fi
 #---COMPILE -O0 (for speed)
 #---GFS_diagnostics.F90
 ############################
-if [ ${CONFIG} = 'shield' ] ||  [ ${CONFIG} = 'shieldfull' ]  || [ ${CONFIG} = 'shiemom' ] || [ ${CONFIG} = 'shieldda' ] ; then
+if [ ${CONFIG} = 'shield' ] ||  [ ${CONFIG} = 'shieldfull' ]  || [ ${CONFIG} = 'shiemom' ] || [ ${CONFIG} = 'shieldda' ] || [ ${CONFIG} = 'shieldfullda' ] ; then
   sed -i 's"$(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c\t$(SRCROOT)SHiELD_physics/GFS_layer/GFS_diagnostics.F90" $(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -O0 -c\t$(SRCROOT)SHiELD_physics/GFS_layer/GFS_diagnostics.F90" ' Makefile_gfs
 fi
 
@@ -166,7 +166,7 @@ fi
 #---model/nh_utils.F90
 #---model/fv_mapz.F90
 ############################
-if [ ${CONFIG} = 'shieldda' ] ; then
+if [ ${CONFIG} = 'shieldda' ] || [ ${CONFIG} = 'shieldfullda' ] ; then
   sed -i 's"$(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c\t$(SRCROOT)atmos_cubed_sphere/model/nh_utils.F90"$(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) $(FAST) -c\t$(SRCROOT)atmos_cubed_sphere/model/nh_utils.F90"' Makefile_fv3core
 
   sed -i 's"$(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c\t$(SRCROOT)atmos_cubed_sphere/model/fv_mapz.F90"$(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) $(FAST) -c\t$(SRCROOT)atmos_cubed_sphere/model/fv_mapz.F90"' Makefile_fv3core

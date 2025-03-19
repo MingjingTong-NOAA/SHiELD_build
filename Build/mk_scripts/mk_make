@@ -41,7 +41,7 @@ pic="nopic"
 for arg in "$@"
 do
     case $arg in
-        shield|solo|shieldfull|shiemom|shieldda)
+        shield|solo|shieldfull|shiemom|shieldda|shieldfullda)
           CONFIG="${arg#*=}"
           shift # Remove CONFIG from processing
           ;;
@@ -96,7 +96,7 @@ if [ ${CONFIG} = 'shield' ] ; then
   if [ ${HPCSTACK} = 'N' ]; then 
     NCEPLIBS+=" -L${NCEP_DIR}/nceplibs/${COMPILER}/ -lbacio  -lsp_d  -lw3emc_d  -lw3nco_d"
   fi
-elif [ ${CONFIG} = 'shieldda' ]; then
+elif [ ${CONFIG} = 'shieldda' ] ; then
   NCEPLIBS="./libfv3.a ./libfv3core.a ${NCEP_DIR}/libFMS/${COMPILER}/${bit}/libFMS.a ./libgfs.a ./libstochastic_physics.a" 
   if [ ${HPCSTACK} = 'N' ]; then 
     NCEPLIBS+=" -L${NCEP_DIR}/nceplibs/${COMPILER}/ -lbacio  -lsp_d  -lw3emc_d  -lw3nco_d"
@@ -105,7 +105,14 @@ elif [ ${CONFIG} = 'shieldfull' ] ; then
   NCEPLIBS="./libfv3.a"
   NCEPLIBS+=" ${NCEP_DIR}/libFMS/${COMPILER}/64bit/libFMS.a"
   NCEPLIBS+=" ./libgfs.a"
-  NCEPLIBS+=" -L${NCEP_DIR}/nceplibs/${COMPILER}/ -lbacio  -lsp_d  -lw3emc_d  -lw3nco_d"
+  if [ ${HPCSTACK} = 'N' ]; then
+    NCEPLIBS+=" -L${NCEP_DIR}/nceplibs/${COMPILER}/ -lbacio  -lsp_d  -lw3emc_d  -lw3nco_d"
+  fi
+elif [ ${CONFIG} = 'shieldfullda' ] ; then
+  NCEPLIBS="./libfv3.a ./libfv3core.a ${NCEP_DIR}/libFMS/${COMPILER}/64bit/libFMS.a ./libgfs.a ./libstochastic_physics.a"
+  if [ ${HPCSTACK} = 'N' ]; then
+    NCEPLIBS+=" -L${NCEP_DIR}/nceplibs/${COMPILER}/ -lbacio  -lsp_d  -lw3emc_d  -lw3nco_d"
+  fi
 elif [ ${CONFIG} = 'solo'  ] ; then
   NCEPLIBS=${NCEP_DIR}/libFMS/${COMPILER}/${bit}/libFMS.a
 elif [ ${CONFIG} = 'shiemom'  ] ; then
@@ -117,17 +124,17 @@ elif [ ${CONFIG} = 'shiemom'  ] ; then
   NCEPLIBS+=" -L${NCEP_DIR}/nceplibs/${COMPILER}/ -lbacio  -lsp_d  -lw3emc_d  -lw3nco_d"
 fi
 
-if [ ${CONFIG} = 'shield' ] || [ ${CONFIG} = 'shieldda' ] ||  [ ${CONFIG} = 'shieldfull' ] || [ ${CONFIG} = 'shiemom' ]  ; then
+if [ ${CONFIG} = 'shield' ] || [ ${CONFIG} = 'shieldda' ] || [ ${CONFIG} = 'shieldfull' ] || [ ${CONFIG} = 'shiemom' ] || [ ${CONFIG} = 'shieldfullda' ] ; then
   (cd exec/${CONFIG}_${HYDRO}.${comp}.${bit}.${COMPILER} ; make -j 8 OPENMP=Y ${COMP} AVX=${AVX} PIC=${PIC} -f Makefile_gfs)
 fi
 
-if [ ${CONFIG} = 'shieldda' ] ; then
+if [ ${CONFIG} = 'shieldda' ] || [ ${CONFIG} = 'shieldfullda' ] ; then
   (cd exec/${CONFIG}_${HYDRO}.${comp}.${bit}.${COMPILER} ; make -j 8 OPENMP=Y ${COMP} AVX=${AVX} NETCDF=3 ${BIT} PIC=${PIC} -f Makefile_fv3core) 
   (cd exec/${CONFIG}_${HYDRO}.${comp}.${bit}.${COMPILER} ; make -j 8 OPENMP=Y ${COMP} AVX=${AVX} -f Makefile_stochastic_physics)
 fi
 (cd exec/${CONFIG}_${HYDRO}.${comp}.${bit}.${COMPILER} ; make -j 8 OPENMP=Y NETCDF=3 ${COMP} AVX=${AVX} ${BIT} PIC=${PIC} NCEPLIBS="${NCEPLIBS}" -f Makefile_fv3)
 
-if   [ ${CONFIG} = 'shieldfull' ] || [ ${CONFIG} = 'shiemom' ] ; then
+if   [ ${CONFIG} = 'shieldfull' ] || [ ${CONFIG} = 'shiemom' ] || [ ${CONFIG} = 'shieldfullda' ] ; then
    (cd exec/${CONFIG}_${HYDRO}.${comp}.${bit}.${COMPILER} ; make -j 8 OPENMP=Y NETCDF=3 ${COMP} AVX=${AVX} PIC=${PIC} NCEPLIBS="${NCEPLIBS}" -f Makefile_driver)
 elif [ ${CONFIG} = 'shield' ] || [ ${CONFIG} = 'shieldda' ] ; then
    (cd exec/${CONFIG}_${HYDRO}.${comp}.${bit}.${COMPILER} ; make -j 8 OPENMP=Y NETCDF=3 ${COMP} AVX=${AVX} ${BIT} PIC=${PIC} NCEPLIBS="${NCEPLIBS}" -f Makefile_driver)
