@@ -155,9 +155,10 @@ elif [ ${CONFIG} = 'shieldfullda' ]; then
       SHiELD_physics/IPD_layer/
 
   list_paths -o ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_fv3core \
-      GFDL_atmos_cubed_sphere/driver/SHiELDFULL/atmosphere.F90 \
       GFDL_atmos_cubed_sphere/tools/ \
-      GFDL_atmos_cubed_sphere/model/
+      GFDL_atmos_cubed_sphere/model/ \
+      SHiELD_physics/atmos_shared/ \
+      GFDL_atmos_cubed_sphere/driver/SHiELDFULL/atmosphere.F90
 
   list_paths -o ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_stochastic_physics \
       stochastic_physics/cellular_automata_global.F90 \
@@ -181,9 +182,7 @@ elif [ ${CONFIG} = 'shieldfullda' ]; then
 
   list_paths -o ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_fv3 \
       SHiELD_physics/FV3GFS/ \
-      SHiELD_physics/atmos_shared/  \
-      SHiELD_physics/stochastic_physics/ \
-      GFDL_atmos_cubed_sphere/driver/SHiELDFULL/atmosphere.F90
+      SHiELD_physics/stochastic_physics/
 
   list_paths -o ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_driver \
       ocean_null/ \

@@ -99,13 +99,22 @@ if [ ${CONFIG} = 'shield' ] || [ ${CONFIG} = 'shieldda' ] || [ ${CONFIG} = 'shie
   mkmf -m Makefile_gfs -a ${SHiELD_SRC} -t "${BUILD_ROOT}/${TEMPLATE}" -o "-cpp" -c "${GFS_cppDefs}" \
            -p libgfs.a ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_gfs
 
-  if [ ${CONFIG} = 'shieldda' ] || [ ${CONFIG} = 'shieldfullda' ] ; then
+  if [ ${CONFIG} = 'shieldda' ] ; then
     mkmf -m Makefile_fv3core -a ${SHiELD_SRC} -t "${BUILD_ROOT}/${TEMPLATE}" -c "${FV3_cppDefs}" \
            -o "-I${SHiELD_SRC}/FMS/include -I${BUILD_ROOT}/Build/libFMS/${COMPILER}/${BIT}" \
            -p libfv3core.a ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_fv3core
     mkmf -m Makefile_stochastic_physics -a ${SHiELD_SRC} -t "${BUILD_ROOT}/${TEMPLATE}"  -o "-cpp" -c "${GFS_cppDefs}" \
            -o "-I${SHiELD_SRC}/FMS/include -I${BUILD_ROOT}/Build/libFMS/${COMPILER}/${BIT}" \
            -p libstochastic_physics.a ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_stochastic_physics
+  fi
+
+  if [ ${CONFIG} = 'shieldfullda' ] ; then
+    mkmf -m Makefile_fv3core -a ${SHiELD_SRC} -t "${BUILD_ROOT}/${TEMPLATE}" \
+         -o "-I${SHiELD_SRC}/FMS/include -I${SHiELD_SRC}/GFDL_atmos_cubed_sphere/driver/SHiELDFULL/include -I${NCEP_DIR}/libFMS/${COMPILER}/64bit" -c "${FV3_cppDefs}" \
+         -p libfv3core.a ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_fv3core
+    mkmf -m Makefile_stochastic_physics -a ${SHiELD_SRC} -t "${BUILD_ROOT}/${TEMPLATE}"  -o "-cpp" -c "${GFS_cppDefs}" \
+         -o "-I${SHiELD_SRC}/FMS/include -I${BUILD_ROOT}/Build/libFMS/${COMPILER}/${BIT}" \
+         -p libstochastic_physics.a ${BUILD_ROOT}/Build/exec/${CONFIG}_${HYDRO}.${COMP}.${BIT}.${COMPILER}/pathnames_stochastic_physics
   fi
 
   if [ ${CONFIG} = 'shield' ] || [ ${CONFIG} = 'shieldda' ] ; then
