@@ -92,7 +92,7 @@ release_da="shield_da"
 fv3_release=$release
 phy_release=$release_da
 fms_release="2024.03"
-fms_c_release="2024.03.01"
+fms_c_release=$release_da
 drivers_release=$release_da
 stoch_release="fad2fe9"
 
@@ -102,7 +102,7 @@ git clone -b ${drivers_release}   https://github.com/MingjingTong-NOAA/atmos_dri
 
 if [ $config_name = 'SHiELD' ] || [ $config_name = 'SHiELDDA' ] || [ $config_name = 'SHiELDFULL' ] || [ $config_name = 'SHiELDFULLDA' ] || [ $config_name = 'SHiEMOM' ] ; then
    git clone -b ${phy_release} https://github.com/MingjingTong-NOAA/SHiELD_physics.git
-   git clone -b ${release_da} https://github.com/MingjingTong-NOAA/FMSCoupler.git
+   git clone -b ${fms_c_release} https://github.com/MingjingTong-NOAA/FMSCoupler.git
 fi
 
 if [ $config_name = 'SHiELDFULL' ] || [ $config_name = 'SHiELDFULLDA' ] ; then
