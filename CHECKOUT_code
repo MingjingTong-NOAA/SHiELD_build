@@ -89,14 +89,14 @@ echo ' '
 release="FV3-202411-public"
 release_da="shield_da"
 
-fv3_release=$release
+fv3_release=$release_da
 phy_release=$release_da
 fms_release="2024.03"
 fms_c_release=$release_da
 drivers_release=$release_da
 stoch_release="fad2fe9"
 
-git clone -b ${fv3_release} https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere
+git clone -b ${fv3_release}   https://github.com/MingjingTong-NOAA/GFDL_atmos_cubed_sphere.git
 git clone -b ${fms_release}   https://github.com/NOAA-GFDL/FMS
 git clone -b ${drivers_release}   https://github.com/MingjingTong-NOAA/atmos_drivers
 
