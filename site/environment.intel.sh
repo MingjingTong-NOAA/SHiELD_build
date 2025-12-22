@@ -241,7 +241,7 @@ case $hostname in
       export LAUNCHER=srun
 
       # highest level of AVX support
-      export AVX_LEVEL=-xSKYLAKE-AVX512
+      export AVX_LEVEL=-march=core-avx2
       echo -e ' '
       module list
       ;;
