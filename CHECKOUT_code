@@ -92,7 +92,7 @@ release_da="shield_da"
 fv3_release=$release_da
 phy_release=$release_da
 fms_release="2024.03"
-fms_c_release=$release_da
+fms_c_release="7ff48eb"
 drivers_release=$release_da
 stoch_release="fad2fe9"
 
