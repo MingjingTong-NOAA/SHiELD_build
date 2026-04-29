@@ -48,7 +48,7 @@ spin()
 # set default values
 #
 # configure your build parameters
-  config="shield"
+  config="shieldda"
   hydro="nh"
   comp="prod"
   bit="32bit"
@@ -57,14 +57,14 @@ spin()
   clean="noclean"
   pic="nopic"
 
-  config_name="SHiELD"
+  config_name="SHiELDDA"
 
 #
 # parse arguments
   for arg in "$@"
   do
       case $arg in
-          shield|solo|shiemom|shiemom_lm4)
+          shield|solo|shiemom|shiemom_lm4|shieldda)
              config="${arg#*=}"
              if [ $config = 'solo' ] ; then
                config_name="SOLO"
@@ -74,6 +74,9 @@ spin()
              fi
              if [ $config = 'shiemom_lm4' ] ; then
                config_name="SHiEMOM_LM4"
+             fi
+             if [ $config = 'shieldda' ] ; then
+                 config_name="SHiELDDA"
              fi
              shift # Remove "config" from processing
              ;;
@@ -107,7 +110,7 @@ spin()
                sleep 20
              fi
              ;;
-          noclean|clean|cleanall)
+          noclean|clean|cleanmom|cleanall)
              clean="${arg#*=}"
              shift # Remove "clean" from processing
              ;;
@@ -121,7 +124,7 @@ spin()
           fi
           echo -e ' '
           echo -e "valid options are:"
-          echo -e "\t[shield(D)  | solo | shiemom | shiemom_lm4] \t\t\t configuration"
+          echo -e "\t[shield(D)  | solo | shiemom | shiemom_lm4 | shieldda] \t\t\t configuration"
           echo -e "\t[nh(D) | hydro | sw] \t\t\t executable configuration"
           echo -e "\t[prod(D) | repro | debug] \t\t compiler option settings"
           echo -e "\t[32bit(D) | 64bit] \t\t\t FV3 precision option"
@@ -157,6 +160,9 @@ export BUILD_ROOT=${PWD%/*}
 export SHiELD_SRC=${PWD%/*/*}/SHiELD_SRC/
 export PATH="${BUILD_ROOT}/mkmf/bin:${BUILD_ROOT}/Build/mk_scripts:${PATH}"
 export LIBS_DIR=${BUILD_ROOT}/Build
+if [ $config = 'shieldda' ] ; then
+  export DACONFIG=Y
+fi
 
 #
 # load the proper environment for your machine
@@ -203,15 +209,17 @@ fi
      \rm -rf libFMS/${compiler}/*
      \rm -rf exec/${config}_${hydro}.${comp}.${bit}.${compiler}/*
      \rm -rf nceplibs/${compiler}/*
-     \rm -rf mom6/${comp}.${bit}.${compiler}/*
-     \rm -rf sis2/${comp}.${bit}.${compiler}/*
-     \rm -rf lm4/${comp}.${bit}.${compiler}/*
+     \rm -rf mom6/${compiler}/*
+     \rm -rf sis2/${compiler}/*
   elif [ ${clean} = "clean" ] ; then
      echo " cleaning build directory in 2 seconds"
      sleep 2
-     \rm -rf mom6/${comp}.${bit}.${compiler}/*
-     \rm -rf lm4/${comp}.${bit}.${compiler}/*
-     \rm -rf sis2/${comp}.${bit}.${compiler}/*
+     \rm -rf exec/${config}_${hydro}.${comp}.${bit}.${compiler}/*
+  elif [ ${clean} = "cleanmom" ] ; then
+     echo " cleaning build directory in 2 seconds"
+     sleep 2
+     \rm -rf mom6/${compiler}/*
+     \rm -rf sis2/${compiler}/*
      \rm -rf exec/${config}_${hydro}.${comp}.${bit}.${compiler}/*
   fi
 
@@ -252,10 +260,10 @@ if [ $config = "shiemom" ] || [ $config = "shiemom_lm4" ]  ; then
 # from lauren
   # I think mom6 needs to be built in 64bit for now?
   # I can only get it to compiler with 64bit FMS
-  if [ -d ${LIBS_DIR}/mom6/${comp}.64bit.${compiler} ] && [ -e ${LIBS_DIR}/mom6/${comp}.64bit.${compiler}/libmom6.a ] ; then
-     echo " pre-built ${LIBS_DIR}/mom6/${comp}.64bit.${compiler} exists"
+  if [ -d ${LIBS_DIR}/mom6/${compiler} ] && [ -e ${LIBS_DIR}/mom6/${compiler}/libmom6.a ] ; then
+     echo " pre-built ${LIBS_DIR}/mom6/${compiler} exists"
   else
-     echo " ${LIBS_DIR}/mom6/${comp}.64bit.${compiler} does not exist"
+     echo " ${LIBS_DIR}/mom6/${compiler} does not exist"
      ./BUILDmom6 ${comp} ${compiler}
      if [ $? -ne 0 ] ; then
         echo " MOM6 build failed"
@@ -265,10 +273,10 @@ if [ $config = "shiemom" ] || [ $config = "shiemom_lm4" ]  ; then
   fi
 
 # for sis2
-  if [ -d ${LIBS_DIR}/sis2/${comp}.64bit.${compiler} ] && [ -e ${LIBS_DIR}/sis2/${comp}.64bit.${compiler}/libsis2.a ] ; then
+  if [ -d ${LIBS_DIR}/sis2/${compiler} ] && [ -e ${LIBS_DIR}/sis2/${compiler}/libsis2.a ] ; then
      echo " pre-built ${LIBS_DIR}/sis2/${compiler} exists"
   else
-     echo " ${LIBS_DIR}/sis2/${comp}.64bit.${compiler} does not exist"
+     echo " ${LIBS_DIR}/sis2/${compiler} does not exist"
      ./BUILDsis2 ${comp} ${compiler}
      if [ $? -ne 0 ] ; then
         echo " SIS2 build failed"
@@ -279,8 +287,8 @@ if [ $config = "shiemom" ] || [ $config = "shiemom_lm4" ]  ; then
 fi
 
 if [ $config = "shiemom_lm4" ] ; then
-  if [ -d ${LIBS_DIR}/lm4/${comp}.64bit.${compiler} ] && [ -e ${LIBS_DIR}/lm4/${comp}.64bit.${compiler}/liblm4.a ] ; then
-       echo " pre-built ${LIBS_DIR}/lm4/${comp}.64bit.${compiler} exists"
+  if [ -d ${LIBS_DIR}/lm4/${compiler} ] && [ -e ${LIBS_DIR}/lm4/${compiler}/liblm4.a ] ; then
+       echo " pre-built ${LIBS_DIR}/lm4/${compiler} exists"
     else
        echo " ${LIBS_DIR}/lm4/${compiler} does not exist"
        ./BUILDlm4 ${comp} ${compiler}
@@ -318,7 +326,12 @@ echo -e "  building ${config} ${hydro} ${comp} ${bit} ${compiler} \t `date`"
     mk_make ${config} ${hydro} ${comp} ${bit} ${avx} ${compiler} ${pic} >> build_${config}_${hydro}.${comp}.${bit}.${compiler}.out 2>&1
   #
   # move the executable to an accessible area
-    mv exec/${config}_${hydro}.${comp}.${bit}.${compiler}/test.x bin/${config_name}_${hydro}.${comp}.${bit}.${compiler}.x
+    if [[ -z "${EXEC_NAME}" ]]; then
+      exec_name=${config_name}_${hydro}.${comp}.${bit}.${compiler}.x
+    else
+      exec_name=${EXEC_NAME}
+    fi
+    mv exec/${config}_${hydro}.${comp}.${bit}.${compiler}/test.x bin/${exec_name}
 
 #
 # test and report on build success
