@@ -31,20 +31,21 @@ case $hostname in
       echo " gaea C6 environment "
 
       . ${MODULESHOME}/init/sh
-      module unload PrgEnv-pgi PrgEnv-intel PrgEnv-gnu
-      module unload darshan-runtime
       module load   PrgEnv-intel
-      module rm intel-classic
-      module rm intel-oneapi
-      module rm intel
-      module rm gcc
       module load intel-classic/2023.2.0
-      module unload cray-libsci
       module load cray-hdf5/1.12.2.11
       module load cray-netcdf/4.9.0.9
       module load craype-hugepages4M
-      #module load cmake/3.27.9
-      #module load libyaml/0.2.5
+
+      module use /ncrc/proj/epic/spack-stack/c6/spack-stack-1.9.2/envs/ue-intel-2023.2.0/install/modulefiles/Core
+      module load stack-intel/2023.2.0
+      module load stack-cray-mpich/8.1.30
+
+      module load bacio/2.4.1
+      module load sp/2.5.0
+      module load w3emc/2.10.0
+
+      module unload cray-libsci
 
       # Add -DHAVE_GETTID to the FMS cppDefs
       export FMS_CPPDEFS=-DHAVE_GETTID

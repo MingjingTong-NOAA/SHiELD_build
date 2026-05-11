@@ -134,6 +134,7 @@ ifeq ($(NETCDF),3)
 endif
 
 ifeq ($(DACONFIG), Y)
+  LDFLAGS += $(BACIO_LIB4) $(SP_LIBd) $(W3EMC_LIBd) $(W3NCO_LIBd)
   LDFLAGS += -qmkl
 endif
 
