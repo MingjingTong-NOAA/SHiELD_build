@@ -194,13 +194,18 @@ case $hostname in
       echo " ursa environment "
 
       source $MODULESHOME/init/sh
-      module load intel-oneapi-compilers/2025.3.1
-      module load intel-oneapi-mpi/2021.17.1
-      module load intel-oneapi-mkl/2025.3.0
+      module use /contrib/spack-stack/spack-stack-1.9.2/envs/ue-oneapi-2024.2.1/install/modulefiles/Core
+      module load stack-oneapi/2024.2.1
+      module load stack-intel-oneapi-mpi/2021.13
+      module load intel-oneapi-mkl/2024.2.1
+
       module load hdf5/1.14.3
       module load netcdf-c/4.9.2
       module load netcdf-fortran/4.6.1
-      module load cmake/3.30.2
+
+      module load bacio/2.4.1
+      module load sp/2.5.0
+      module load w3emc/2.10.0
 
       export LIBRARY_PATH="${LIBRARY_PATH}:${NETCDF}/lib:${HDF5}/lib"
       export NETCDF_DIR=${NETCDF}
@@ -216,7 +221,7 @@ case $hostname in
       export TEMPLATE=site/intel.mk
       export LAUNCHER=srun
 
-      export AVX_LEVEL=-xHOST
+      export AVX_LEVEL=-march=core-avx2
       echo -e ''
       module list
       ;;
